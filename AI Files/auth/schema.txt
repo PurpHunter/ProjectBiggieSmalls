@@ -1,0 +1,10 @@
+CREATE DATABASE ai_auth;
+
+USE ai_auth;
+
+CREATE TABLE users (
+    id CHAR(36) PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password_hash BLOB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

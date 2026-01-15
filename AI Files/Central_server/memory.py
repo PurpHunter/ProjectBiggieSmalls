@@ -1,41 +1,18 @@
 import json
 from pathlib import Path
-import chromadb
 
 BASE = Path("users")
 
-def user_dir(user_id):
-    d = BASE / user_id
-    d.mkdir(parents=True, exist_ok=True)
-    return d
-
 def load_memory(user_id):
-    path = user_dir(user_id) / "long_term.json"
-    if not path.exists():
-        path.write_text(json.dumps({
-            "preferences": [],
-            "facts": []
-        }, indent=2))
-    return json.loads(path.read_text())
+    user_dir = BASE / user_id
+    user_dir.mkdir(parents=True, exist_ok=True)
 
-def update_memory(user_id, user_msg, ai_msg):
-    summary = f"User said: {user_msg}. AI replied: {ai_msg}"
-    client = chromadb.Client(
-        chromadb.config.Settings(
-            persist_directory=str(user_dir(user_id) / "episodic/chroma")
-        )
-    )
-    collection = client.get_or_create_collection("memory")
-    collection.add(documents=[summary], ids=[str(collection.count())])
-    client.persist()
+    f = user_dir / "long_term.json"
+    if not f.exists():
+        f.write_text("{}")
 
-def recall_memory(user_id, query):
-    client = chromadb.Client(
-        chromadb.config.Settings(
-            persist_directory=str(user_dir(user_id) / "episodic/chroma")
-        )
-    )
-    collection = client.get_or_create_collection("memory")
-    if collection.count() == 0:
-        return []
-    return collection.query(query_texts=[query], n_results=3)["documents"][0]
+    return json.loads(f.read_text())
+
+def save_memory(user_id, memory):
+    f = BASE / user_id / "long_term.json"
+    f.write_text(json.dumps(memory, indent=2))

@@ -1,27 +1,37 @@
 import jwt
 from flask import Flask, request, jsonify
-from memory import load_memory, recall_memory, update_memory
-from ollama_client import chat
+from router import route
+from memory import load_memory, save_memory
+from ollama_client import ask_ollama
+from agents import fitness, mental_health, nutrition
 
-SECRET = "CHANGE_THIS_SECRET"
+SECRET = "CHANGE_ME"
+
+AGENTS = {
+    "fitness": fitness,
+    "mental_health": mental_health,
+    "nutrition": nutrition
+}
 
 app = Flask(__name__)
 
 @app.route("/chat", methods=["POST"])
-def chat_endpoint():
+def chat():
     token = request.json["token"]
-    message = request.json["message"]
+    text = request.json["message"]
 
-    payload = jwt.decode(token, SECRET, algorithms=["HS256"])
-    user_id = payload["user_id"]
+    user_id = jwt.decode(token, SECRET, algorithms=["HS256"])["user_id"]
+    memory = load_memory(user_id)
 
-    long_term = load_memory(user_id)
-    recalled = recall_memory(user_id, message)
+    agent = AGENTS[route(text)]
+    result = agent.handle(user_id, text, memory, ask_ollama)
 
-    response = chat(user_id, message, long_term, recalled)
-    update_memory(user_id, message, response)
+    if "handoff" in result:
+        result = AGENTS[result["handoff"]].handle(
+            user_id, text, memory, ask_ollama
+        )
 
-    return jsonify({"response": response})
+    save_memory(user_id, memory)
+    return jsonify({"response": result["response"]})
 
-if __name__ == "__main__":
-    app.run(port=9000)
+app.run(port=9000)

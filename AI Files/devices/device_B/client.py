@@ -1,10 +1,8 @@
 import requests
 
-SERVER = "http://localhost:9000/chat"
-
 def send(token, message):
-    r = requests.post(SERVER, json={
-        "token": token,
-        "message": message
-    })
-    return r.json()["response"]
+    res = requests.post(
+        "http://localhost:9000/chat",
+        json={"token": token, "message": message}
+    )
+    return res.json()["response"]
