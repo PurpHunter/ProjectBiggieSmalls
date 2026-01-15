@@ -1,14 +1,21 @@
-from escalation import detect_crisis, crisis_message
+import joblib, numpy as np
+from escalation import crisis_message
+
+clf = joblib.load("models/mental_health_classifier.joblib")
+vectorizer = joblib.load("models/global_vectorizer.joblib")
 
 def handle(user_id, text, memory, llm):
-    if detect_crisis(text):
+    X_text = vectorizer.transform([text]).toarray()
+    X_num = np.zeros((1, clf["coef"].shape[1] - X_text.shape[1]))
+    X = np.hstack([X_text, X_num])
+
+    score = X @ clf["coef"].T + clf["intercept"]
+
+    if score > 1.5:
         return {"response": crisis_message(), "escalated": True}
 
-    prompt = f"""
-You are a mental health support assistant.
-Do NOT diagnose.
-User context: {memory}
-Message: {text}
-Respond calmly and supportively.
-"""
-    return {"response": llm(prompt)}
+    return {
+        "response": llm(
+            f"You are a mental health support assistant.\nMessage: {text}"
+        )
+    }
