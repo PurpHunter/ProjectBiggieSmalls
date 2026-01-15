@@ -1,16 +1,9 @@
-import sqlite3
-import uuid
-import bcrypt
-import jwt
+import uuid, bcrypt, jwt
 from flask import Flask, request, jsonify
+from db import get_db
 
-SECRET = "CHANGE_THIS_SECRET"
-DB = "users.db"
-
+SECRET = "CHANGE_ME"
 app = Flask(__name__)
-
-def get_db():
-    return sqlite3.connect(DB)
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -19,8 +12,9 @@ def register():
     pw_hash = bcrypt.hashpw(data["password"].encode(), bcrypt.gensalt())
 
     db = get_db()
-    db.execute(
-        "INSERT INTO users VALUES (?, ?, ?)",
+    cur = db.cursor()
+    cur.execute(
+        "INSERT INTO users (id, username, password_hash) VALUES (%s, %s, %s)",
         (user_id, data["username"], pw_hash)
     )
     db.commit()
@@ -31,18 +25,17 @@ def register():
 def login():
     data = request.json
     db = get_db()
-    user = db.execute(
-        "SELECT id, password FROM users WHERE username=?",
+    cur = db.cursor()
+    cur.execute(
+        "SELECT id, password_hash FROM users WHERE username=%s",
         (data["username"],)
-    ).fetchone()
+    )
+    row = cur.fetchone()
 
-    if not user or not bcrypt.checkpw(
-        data["password"].encode(), user[1]
-    ):
-        return jsonify({"error": "Invalid login"}), 401
+    if not row or not bcrypt.checkpw(data["password"].encode(), row[1]):
+        return jsonify({"error": "Invalid credentials"}), 401
 
-    token = jwt.encode({"user_id": user[0]}, SECRET, algorithm="HS256")
+    token = jwt.encode({"user_id": row[0]}, SECRET, algorithm="HS256")
     return jsonify({"token": token})
 
-if __name__ == "__main__":
-    app.run(port=8000)
+app.run(port=8000)
