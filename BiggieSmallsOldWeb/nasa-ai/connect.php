@@ -7,7 +7,7 @@ $dsn = 'mysql:host=localhost;dbname=nasaaidb';
 try {
     $con = new PDO($dsn, $username, $password);
     $con->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch(PDOException $e) {   // ← typo fixed here
+} catch(PDOException $e) {   
     $error_message = $e->getMessage();
     echo "<p>Error Connecting to the Database: $error_message</p>";
     exit();
