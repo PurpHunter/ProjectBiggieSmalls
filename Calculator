@@ -1,0 +1,168 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <cmath>
+
+using namespace std;
+
+double get_valid_numeric(string prompt, bool positive = false, string explanation = "") {
+    double value;
+    bool valid = false;
+    while (!valid) {
+        if (!explanation.empty()) cout << explanation << endl;
+        cout << prompt;
+        cin >> value;
+
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(10000, '\n');
+            cout << "Invalid input. Try again." << endl;
+            continue;
+        }
+
+        if (positive && value <= 0) {
+            cout << "Please enter a positive number." << endl;
+            continue;
+        }
+
+        valid = true;
+    }
+    return value;
+}
+
+string get_valid_option(string prompt, string options[], int size, string explanation = "") {
+    string value;
+    bool valid = false;
+    while (!valid) {
+        if (!explanation.empty()) cout << explanation << endl;
+        cout << prompt;
+        cin >> value;
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+        for (int i = 0; i < size; i++) {
+            if (value == options[i]) {
+                valid = true;
+                break;
+            }
+        }
+
+        if (!valid) {
+            cout << "Invalid option. Choose from: ";
+            for (int i = 0; i < size; i++) {
+                cout << options[i];
+                if (i != size - 1) cout << ", ";
+            }
+            cout << endl;
+        }
+    }
+    return value;
+}
+
+double get_height_cm() {
+    string unit_options[] = {"cm", "ft"};
+    string explanation = "Enter your height in centimeters (cm) or in feet/inches (ft).";
+    string unit = get_valid_option("Height unit (cm or ft): ", unit_options, 2, explanation);
+
+    if (unit == "cm") {
+        return get_valid_numeric("Height (cm): ", true);
+    } else {
+        double feet = get_valid_numeric("Feet: ", true);
+        double inches = get_valid_numeric("Inches: ", true);
+        return feet * 30.48 + inches * 2.54;
+    }
+}
+
+double get_weight_kg() {
+    string unit_options[] = {"kg", "lb"};
+    string explanation = "Enter your weight in kilograms (kg) or pounds (lb).";
+    string unit = get_valid_option("Weight unit (kg or lb): ", unit_options, 2, explanation);
+
+    if (unit == "kg") {
+        return get_valid_numeric("Weight (kg): ", true);
+    } else {
+        double pounds = get_valid_numeric("Weight (lb): ", true);
+        return pounds * 0.453592;
+    }
+}
+
+int protein_dri(double weight_kg) { return round(weight_kg * 0.8); }
+int fiber_dri(string sex) { return (sex == "male") ? 38 : 25; }
+int water_dri(string sex) { return (sex == "male") ? 3700 : 2700; }
+int calcium_dri() { return 1000; }
+int iron_dri(string sex) { return (sex == "male") ? 8 : 18; }
+int vitamin_c_dri(string sex) { return (sex == "male") ? 90 : 75; }
+int vitamin_d_dri() { return 15; }
+int potassium_dri(string sex) { return (sex == "male") ? 3400 : 2600; }
+int sodium_limit() { return 2300; }
+
+double calculate_bmi(double weight_kg, double height_cm) {
+    double height_m = height_cm / 100.0;
+    return round(weight_kg / (height_m * height_m) * 10) / 10.0;
+}
+
+int calculate_eer(string sex, int age, double weight_kg, double height_cm, string activity) {
+    double height_m = height_cm / 100.0;
+    double pa = 1.0;
+
+    if (activity == "sedentary") pa = 1.0;
+    else if (activity == "low") pa = 1.11;
+    else if (activity == "active") pa = 1.25;
+    else if (activity == "very active") pa = 1.48;
+
+    double eer = 0.0;
+    if (sex == "male") {
+        eer = 662 - (9.53 * age) + pa * (15.91 * weight_kg + 539.6 * height_m);
+    } else {
+        eer = 354 - (6.91 * age) + pa * (9.36 * weight_kg + 726 * height_m);
+    }
+    return round(eer);
+}
+
+int main() {
+    cout << "=== Nutritional Health Calculator ===\n" << endl;
+
+    int age = static_cast<int>(get_valid_numeric("Age: ", true, "Enter your age in years."));
+
+    string sex_options[] = {"male", "female"};
+    string sex = get_valid_option("Sex (male/female): ", sex_options, 2, "Enter 'male' or 'female'.");
+
+    double height_cm = get_height_cm();
+    double weight_kg = get_weight_kg();
+
+    string activity_options[] = {"sedentary", "low", "active", "very active"};
+    string activity = get_valid_option(
+        "Activity level (sedentary / low / active / very active): ",
+        activity_options, 4,
+        "Choose your activity level:\n"
+        "sedentary = little or no exercise\n"
+        "low = light exercise 1–3 days/week\n"
+        "active = moderate exercise 3–5 days/week\n"
+        "very active = hard exercise 6–7 days/week"
+    );
+
+    cout << "\n====================================" << endl;
+    cout << "        NUTRITION REPORT" << endl;
+    cout << "====================================" << endl;
+
+    cout << "Height: " << round(height_cm) << " cm" << endl;
+    cout << "Weight: " << round(weight_kg * 10) / 10.0 << " kg" << endl;
+    cout << "BMI: " << calculate_bmi(weight_kg, height_cm) << endl;
+
+    int calories = calculate_eer(sex, age, weight_kg, height_cm, activity);
+    cout << "\nEstimated Daily Calories: " << calories << " kcal" << endl;
+
+    cout << "\n--- Daily Nutrient Recommendations ---" << endl;
+    cout << "Protein      : " << protein_dri(weight_kg) << " g" << endl;
+    cout << "Fiber        : " << fiber_dri(sex) << " g" << endl;
+    cout << "Water        : " << water_dri(sex) << " ml" << endl;
+    cout << "Calcium      : " << calcium_dri() << " mg" << endl;
+    cout << "Iron         : " << iron_dri(sex) << " mg" << endl;
+    cout << "Vitamin C    : " << vitamin_c_dri(sex) << " mg" << endl;
+    cout << "Vitamin D    : " << vitamin_d_dri() << " mcg" << endl;
+    cout << "Potassium    : " << potassium_dri(sex) << " mg" << endl;
+    cout << "Sodium (max) : " << sodium_limit() << " mg" << endl;
+
+    cout << "\n====================================" << endl;
+
+    return 0;
+}
