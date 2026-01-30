@@ -1,0 +1,228 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <cctype>
+
+using namespace std;
+
+bool is_valid_number(const string& s, bool allow_decimal) {
+    bool decimal_seen = false;
+    if (s.empty()) return false;
+
+    for (char c : s) {
+        if (isdigit(c)) continue;
+        if (allow_decimal && c == '.' && !decimal_seen) {
+            decimal_seen = true;
+            continue;
+        }
+        return false;
+    }
+    return true;
+}
+
+int get_valid_age() {
+    string input;
+    bool valid = false;
+    int age = 0;
+
+    while (!valid) {
+        cout << "Enter your age in years (18–120): ";
+        cin >> input;
+
+        valid = true;
+        for (char c : input) {
+            if (!isdigit(c)) {
+                valid = false;
+                break;
+            }
+        }
+
+        if (!valid) {
+            cout << "Age must contain digits only.\n";
+            continue;
+        }
+
+        age = stoi(input);
+        if (age < 18 || age > 120) {
+            cout << "Enter a realistic age (18–120).\n";
+            valid = false;
+        }
+    }
+
+    return age;
+}
+
+double get_numeric_input(const string& prompt, bool positive = false, double min = 0, double max = 1e6) {
+    string input;
+    bool valid = false;
+    double value = 0;
+
+    while (!valid) {
+        cout << prompt;
+        cin >> input;
+
+        if (!is_valid_number(input, true)) {
+            cout << "Invalid input.\n";
+            continue;
+        }
+
+        value = stod(input);
+        if (positive && value <= 0) {
+            cout << "Value must be positive.\n";
+            continue;
+        }
+
+        if (value < min || value > max) {
+            cout << "Enter a value between " << min << " and " << max << ".\n";
+            continue;
+        }
+
+        valid = true;
+    }
+
+    return value;
+}
+
+string get_valid_option(const string& prompt, const string options[], int size) {
+    string value;
+    bool valid = false;
+
+    while (!valid) {
+        cout << prompt;
+        cin >> value;
+        transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+        for (int i = 0; i < size; i++) {
+            if (value == options[i]) {
+                valid = true;
+                break;
+            }
+        }
+
+        if (!valid) {
+            cout << "Invalid option. Choose from: ";
+            for (int i = 0; i < size; i++) {
+                cout << options[i] << (i < size - 1 ? ", " : "\n");
+            }
+        }
+    }
+
+    return value;
+}
+
+double get_height_cm() {
+    string units[] = {"cm", "ft"};
+    string unit = get_valid_option("Height unit (cm or ft): ", units, 2);
+
+    if (unit == "cm") {
+        return get_numeric_input("Height (cm): ", true, 50, 250);
+    }
+
+    double feet = get_numeric_input("Feet: ", true, 1, 8);
+
+    double inches = get_numeric_input("Inches (0–11): ", false, 0, 11);
+
+    return feet * 30.48 + inches * 2.54;
+}
+
+double get_weight_kg() {
+    string units[] = {"kg", "lb"};
+    string unit = get_valid_option("Weight unit (kg or lb): ", units, 2);
+
+    double value;
+    if (unit == "kg") {
+        value = get_numeric_input("Weight (kg): ", true, 10, 200);
+    } else {
+        value = get_numeric_input("Weight (lb): ", true, 22, 440);
+        value = value * 0.453592;
+    }
+
+    return value;
+}
+
+int protein_dri(double weight, string env) { return round(weight * (env == "space" ? 1.0 : 0.8)); }
+int calcium_dri(string env) { return env == "space" ? 1200 : 1000; }
+int vitamin_d_dri(string env) { return env == "space" ? 20 : 15; }
+int sodium_target(string env) { return env == "space" ? 1800 : 2300; }
+int sodium_max() { return 2300; }
+
+int vitamin_c_dri(string sex, string radiation) {
+    int base = (sex == "male") ? 90 : 75;
+    if (radiation == "high") base += 20;
+    return base;
+}
+
+int water_dri(string sex, string env, string eva) {
+    int base = (sex == "male") ? 3700 : 2700;
+    if (env == "space") base -= 200;
+    if (eva == "frequent") base += 500;
+    return base;
+}
+
+double calculate_bmi(double weight, double height_cm) {
+    double m = height_cm / 100.0;
+    return round(weight / (m * m) * 10) / 10.0;
+}
+
+int calculate_eer(string sex, int age, double w, double h, string activity) {
+    double pa = 1.0;
+    if (activity == "low") pa = 1.11;
+    else if (activity == "active") pa = 1.25;
+    else if (activity == "very active") pa = 1.48;
+
+    double m = h / 100.0;
+    double eer = (sex == "male")
+        ? 662 - 9.53 * age + pa * (15.91 * w + 539.6 * m)
+        : 354 - 6.91 * age + pa * (9.36 * w + 726 * m);
+
+    return round(eer);
+}
+
+int adjust_calories_for_eva(int calories, string eva) {
+    if (eva == "frequent") return calories + 300;
+    if (eva == "occasional") return calories + 150;
+    return calories;
+}
+
+int main() {
+    cout << "=== ISS Nutritional Health Calculator ===\n\n";
+
+    int age = get_valid_age();
+
+    string sex_opts[] = {"male", "female"};
+    string sex = get_valid_option("Sex (male/female): ", sex_opts, 2);
+
+    double height = get_height_cm();
+    double weight = get_weight_kg();
+
+    string env_opts[] = {"earth", "space"};
+    string env = get_valid_option("Environment (earth/space): ", env_opts, 2);
+
+    string rad_opts[] = {"low", "moderate", "high"};
+    string radiation = get_valid_option("Radiation exposure (low/moderate/high): ", rad_opts, 3);
+
+    string eva_opts[] = {"none", "occasional", "frequent"};
+    string eva = get_valid_option("EVA frequency (none/occasional/frequent): ", eva_opts, 3);
+
+    string act_opts[] = {"sedentary", "low", "active", "very active"};
+    string activity = get_valid_option("Activity level (sedentary, low, active, very active): ", act_opts, 4);
+
+    int calories = adjust_calories_for_eva(
+        calculate_eer(sex, age, weight, height, activity),
+        eva
+    );
+
+    cout << "\n--- NUTRITION REPORT ---\n";
+    cout << "BMI: " << calculate_bmi(weight, height) << endl;
+    cout << "Calories: " << calories << " kcal\n";
+    cout << "Protein: " << protein_dri(weight, env) << " g\n";
+    cout << "Calcium: " << calcium_dri(env) << " mg\n";
+    cout << "Vitamin D: " << vitamin_d_dri(env) << " mcg\n";
+    cout << "Vitamin C: " << vitamin_c_dri(sex, radiation) << " mg\n";
+    cout << "Water: " << water_dri(sex, env, eva) << " ml\n";
+    cout << "Sodium target: " << sodium_target(env) << " mg\n";
+    cout << "Sodium max: " << sodium_max() << " mg\n";
+
+    return 0;
+}
