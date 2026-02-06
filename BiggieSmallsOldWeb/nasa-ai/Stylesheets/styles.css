@@ -1,49 +1,59 @@
 
 body { 
-  font-family: Arial;
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #1a1a1a;
+  background-color: #f7f7f7;
 }
 
 
 h1 {
-    background-color: white;    
-    padding: 12px;              
-    border-radius: 12px;        
-    width: fit-content;    
+    background-color: #ffffff;
+    color: #111111;
+    padding: 12px;
+    border-radius: 12px;
+    width: fit-content;
     margin: 0 auto;
 }
 h2 {
-    background-color: white;    
-    padding: 10px;              
-    border-radius: 12px;        
-    width: fit-content;  
+    background-color: #ffffff;
+    color: #111111;
+    padding: 10px;
+    border-radius: 12px;
+    width: fit-content;
     margin: 0 auto;
 }
 h3 {
-    background-color: white;    
-    padding: 10px;              
-    border-radius: 12px;        
-    width: fit-content;  
+    background-color: #ffffff;
+    color: #111111;
+    padding: 10px;
+    border-radius: 12px;
+    width: fit-content;
     margin: 0 auto;
 }
 p {
-    background-color: white;    
-    padding: 10px;              
-    border-radius: 12px;        
-    width: fit-content;  
+    background-color: #ffffff;
+    color: #111111;
+    padding: 10px;
+    border-radius: 12px;
+    width: fit-content;
     margin: 0 auto;
 }
 form {
-    background-color: white;    
-    padding: 10px;              
-    border-radius: 12px;        
-    width: fit-content;  
+    background-color: #ffffff;
+    color: #111111;
+    padding: 10px;
+    border-radius: 12px;
+    width: fit-content;
     margin: 0 auto;
 }
 nav {
-    background-color: white;    
-    padding: 10px;              
+    background-color: #ffffff;
+    color: #111111;
+    padding: 10px;
     border-radius: 12px;
-    width: fit-content;     
+    width: fit-content;
     margin: 0 auto;
 }
 
@@ -55,9 +65,9 @@ nav {
 
 .sidebar-bg {
     width: 220px;               
-    background-color: #b8b8b8;
+    background-color: #2b2b2b;
     border-radius: 20px;
-    border: 5px solid #ccc;
+    border: 3px solid #5c5c5c;
     padding: 20px;
     position: fixed;
     top: 20px;                  /* distance from top */
@@ -77,23 +87,27 @@ nav {
 
 .sidebar a {
   display: block;       /* make them stack vertically */
-  font-size: 25px;
-  color: white;
+  font-size: 20px;
+  color: #ffffff;
   text-decoration: none;
   padding: 10px;
   margin: 4px 0;
-  background-color: #444;
+  background-color: #1f5da0;
   border-radius: 6px;
+  line-height: 1.4;
  
 }
-.sidebar a:hover {
-  background-color: #555;
+.sidebar a:hover,
+.sidebar a:focus-visible {
+  background-color: #17497c;
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
   cursor: pointer;
 }
 .sidebar a.disabled {
   pointer-events: none;   /* makes it unclickable */
-  background-color: #222;
-  color: gray;
+  background-color: #4a4a4a;
+  color: #cfcfcf;
 }
 .sidebar img {
     display: block;
@@ -118,4 +132,13 @@ nav {
   border: 1px solid #ddd;
   padding: 10px;
   margin-bottom: 10px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid #0b5fff;
+  outline-offset: 2px;
 }
