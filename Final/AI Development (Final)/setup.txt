@@ -1,0 +1,173 @@
+==============================
+Federated AI Environment Setup
+==============================
+
+This guide explains how to set up and run the Federated AI system using
+Python Virtual Environments (venv) and Command Prompt (no Anaconda).
+
+--------------------------------------
+1. Install Python (If Not Installed)
+--------------------------------------
+
+1. Download Python from:
+   https://www.python.org/downloads/windows/
+
+2. During installation:
+   ✔ Check: "Add Python to PATH"
+   ✔ Click: Install Now
+
+3. After install, open Command Prompt and test:
+
+   python --version
+
+   You should see: Python 3.x.x
+
+--------------------------------------
+2. Place the Project Folder
+--------------------------------------
+
+1. Put the project folder in a convenient location, for example:
+
+   C:\Users\YourName\Documents\AI_Development
+
+2. Folder structure:
+
+AI_Development\
+├── central_server\
+├── devices\
+│   ├── device_A\
+│   ├── device_B\
+│   └── device_C\
+├── models\
+│   ├── global_vectorizer.joblib
+│   └── mental_health_classifier.joblib
+└── scripts / other files
+
+--------------------------------------
+3. Create Virtual Environment (venv)
+--------------------------------------
+
+1. Open Command Prompt.
+
+2. Navigate to the project folder:
+
+   cd C:\Users\YourName\Documents\AI_Development
+
+3. Create virtual environment:
+
+   python -m venv federated-ai
+
+4. Activate environment:
+
+   federated-ai\Scripts\activate
+
+5. You should see:
+
+   (federated-ai)
+
+6. Install dependencies:
+
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   pip install flask pandas scikit-learn joblib requests numpy
+
+--------------------------------------
+4. Organize CSV Data
+--------------------------------------
+
+1. Each device has its own training CSV:
+
+   devices\device_A\crew_A_train.csv
+   devices\device_B\crew_B_train.csv
+   devices\device_C\crew_C_train.csv
+
+2. Optional validation CSVs:
+
+   devices\device_A\crew_A_val.csv
+   devices\device_B\crew_B_val.csv
+   devices\device_C\crew_C_val.csv
+
+3. Place global vectorizer in each device folder
+   (or in the models folder if shared):
+
+   global_vectorizer.joblib
+
+--------------------------------------
+5. Running the Servers
+--------------------------------------
+
+1. Activate environment:
+
+   federated-ai\Scripts\activate
+
+2. Open separate terminals for each server.
+
+3. Run:
+
+   a) Auth Server:
+      python central_server\auth_server.py
+
+   b) Federated Server:
+      python central_server\federated_server.py
+
+   c) AI Server:
+      python central_server\ai_server.py
+
+--------------------------------------
+6. Running Device Clients
+--------------------------------------
+
+1. Open a new terminal for each device.
+
+2. Activate environment:
+
+   federated-ai\Scripts\activate
+
+3. Go to device folder:
+
+   cd devices\device_A
+
+4. Run client:
+
+   python federated_client.py
+
+5. Repeat for device_B and device_C.
+
+--------------------------------------
+7. Notes / Tips
+--------------------------------------
+
+- Always activate the environment before running scripts.
+- CSV files must be in the same folder as their client script.
+- Vectorizer file must be present before training.
+- First device can bootstrap the global model.
+- Larger datasets = better accuracy.
+- You may create .bat files to automate startup.
+
+--------------------------------------
+8. Troubleshooting
+--------------------------------------
+
+- "python not recognized":
+  Reinstall Python and enable PATH.
+
+- "pip not found":
+  Run: python -m ensurepip --upgrade
+
+- "CSV not found":
+  Verify file paths and filenames.
+
+- "Module not found":
+  Reinstall dependencies with pip.
+
+--------------------------------------
+9. Optional Tools
+--------------------------------------
+
+- Use generate_crew_data.py for test datasets.
+- Do not overwrite real data unless intended.
+- Backup models before retraining.
+
+==============================
+End of Instructions
+==============================
